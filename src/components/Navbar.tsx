@@ -43,7 +43,7 @@ const Navbar: React.FC = () => {
     { title: "首页", href: "/" },
     { title: "设计严选库", href: "/products/lighting" },
     { title: "家具全球购", href: "/global-furniture" },
-    { title: "Z Space Plus", href: "/z-space-plus" },
+    { title: "ZSPACEPLUS", href: "/z-space-plus" },
   ];
 
   return (

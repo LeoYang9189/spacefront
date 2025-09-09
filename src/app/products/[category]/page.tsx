@@ -44,7 +44,22 @@ const MATCH_TAGS = [
 const CATEGORY_CONFIG = {
   家具: ["沙发", "椅类", "桌类", "柜类", "床", "屏风", "置物架", "推车"],
   灯具: ["吊灯", "吸顶灯", "壁灯", "落地灯", "台灯"],
-  饰品: ["镜子", "钟", "香薰蜡烛", "相框", "烟灰缸", "摆件", "雕塑", "地毯", "床垫", "花瓶花盆", "收纳用品", "垃圾桶", "托盘", "挂画"],
+  饰品: [
+    "镜子",
+    "钟",
+    "香薰蜡烛",
+    "相框",
+    "烟灰缸",
+    "摆件",
+    "雕塑",
+    "地毯",
+    "床垫",
+    "花瓶花盆",
+    "收纳用品",
+    "垃圾桶",
+    "托盘",
+    "挂画",
+  ],
 };
 
 type CategoryType = {
@@ -101,7 +116,6 @@ const FilterSection = ({
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="overflow-hidden"
           >
             <div className="space-y-3 pt-3">
               {items.map((item) => (
@@ -148,9 +162,12 @@ const FilterSection = ({
                   >
                     {item.categoryLabel || item.label}
                   </span>
-                  {!isRadio && selectedItems.includes(item.category || item.value) && (
-                    <span className="ml-auto text-sm text-brand-400">已选</span>
-                  )}
+                  {!isRadio &&
+                    selectedItems.includes(item.category || item.value) && (
+                      <span className="ml-auto text-sm text-brand-400">
+                        已选
+                      </span>
+                    )}
                 </label>
               ))}
             </div>
@@ -200,7 +217,9 @@ const ProductListPage = ({ params }: { params: { category: string } }) => {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
-  const [selectedFunctionTags, setSelectedFunctionTags] = useState<string[]>([]);
+  const [selectedFunctionTags, setSelectedFunctionTags] = useState<string[]>(
+    []
+  );
   const [selectedMatchTags, setSelectedMatchTags] = useState<string[]>([]);
   const [productList, setProductList] = useState<any[]>([]);
   const [total, setTotal] = useState(0);
@@ -261,7 +280,15 @@ const ProductListPage = ({ params }: { params: { category: string } }) => {
 
   useEffect(() => {
     getList();
-  }, [categoryObj, selectedMainCategory, selectedCategories, selectedBrands, selectedStatus, selectedFunctionTags, selectedMatchTags]);
+  }, [
+    categoryObj,
+    selectedMainCategory,
+    selectedCategories,
+    selectedBrands,
+    selectedStatus,
+    selectedFunctionTags,
+    selectedMatchTags,
+  ]);
 
   // 计算总页数
   const totalPages = Math.ceil(productList.length / itemsPerPage);
@@ -333,7 +360,10 @@ const ProductListPage = ({ params }: { params: { category: string } }) => {
   };
 
   // 移除已选筛选条件
-  const removeFilter = (type: "category" | "brand" | "status" | "functionTag" | "matchTag", value: string) => {
+  const removeFilter = (
+    type: "category" | "brand" | "status" | "functionTag" | "matchTag",
+    value: string
+  ) => {
     if (type === "category") {
       setSelectedCategories((prev) => prev.filter((c) => c !== value));
     } else if (type === "brand") {
@@ -460,10 +490,10 @@ const ProductListPage = ({ params }: { params: { category: string } }) => {
           <div className="flex-1">
             {/* 已选筛选条件 */}
             <AnimatePresence>
-              {(selectedCategories.length > 0 || 
-                selectedBrands.length > 0 || 
-                selectedStatus.length > 0 || 
-                selectedFunctionTags.length > 0 || 
+              {(selectedCategories.length > 0 ||
+                selectedBrands.length > 0 ||
+                selectedStatus.length > 0 ||
+                selectedFunctionTags.length > 0 ||
                 selectedMatchTags.length > 0) && (
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}

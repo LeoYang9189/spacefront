@@ -1,12 +1,12 @@
-'use client'
+"use client";
 
-import React, { useEffect, useState } from 'react'
-import Image from 'next/image'
-import { motion } from 'framer-motion'
-import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
-import Link from 'next/link'
-import { getBanner2List } from '@/api/common'
-import { tryCatch } from '@/utils/util'
+import React, { useEffect, useState } from "react";
+import Image from "next/image";
+import { motion } from "framer-motion";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import Link from "next/link";
+import { getBanner2List } from "@/api/common";
+import { tryCatch } from "@/utils/util";
 
 // const products = [
 //   {
@@ -33,49 +33,49 @@ import { tryCatch } from '@/utils/util'
 // ]
 
 interface Product {
-  coverImage: string
-  title: string
-  introduce: string
-  designer: string
+  coverImage: string;
+  title: string;
+  introduce: string;
+  designer: string;
 }
 
 const ProductShowcase = () => {
-  const [mounted, setMounted] = useState(false)
-  const [products, setProducts] = useState<Product[]>([])
-  const [currentSlide, setCurrentSlide] = useState(0)
+  const [mounted, setMounted] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
     const getBanner2ListData = async () => {
-      const [err, list] = await tryCatch(getBanner2List)
-      if (err) return
-      setProducts(list)
-      setMounted(true)
-    }
-    getBanner2ListData()
-  }, [])
+      const [err, list] = await tryCatch(getBanner2List);
+      if (err) return;
+      setProducts(list);
+      setMounted(true);
+    };
+    getBanner2ListData();
+  }, []);
 
-  if (!mounted) return null
+  if (!mounted) return null;
 
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % products.length)
-  }
+    setCurrentSlide((prev) => (prev + 1) % products.length);
+  };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + products.length) % products.length)
-  }
+    setCurrentSlide((prev) => (prev - 1 + products.length) % products.length);
+  };
 
   const getIntroduce = (item: Product) => {
-    if (!item.introduce) return null
+    if (!item.introduce) return null;
     return (
       <p className="text-[#235A5A] text-[16px] pb-[7px]">
         品牌介绍:{products[currentSlide].introduce}
       </p>
-    )
-  }
+    );
+  };
   const getDesigner = (item: Product) => {
-    if (!item.designer) return null
-    return <p className="text-[#235A5A] pt-[7px]">设计师:{item.designer}</p>
-  }
+    if (!item.designer) return null;
+    return <p className="text-[#235A5A] pt-[7px]">设计师:{item.designer}</p>;
+  };
 
   return (
     <section className="w-full bg-white py-12">
@@ -98,22 +98,22 @@ const ProductShowcase = () => {
           <div className="w-48">
             <nav className="space-y-6">
               <Link
-                href="/products/lighting"
-                className="group block relative py-2"
-              >
-                <span className="block text-xl font-medium text-brand-600">
-                  灯具
-                </span>
-                <span className="absolute bottom-0 left-0 w-8 h-0.5 bg-brand-600 transition-all group-hover:w-full"></span>
-              </Link>
-              <Link
                 href="/products/furniture"
                 className="group block relative py-2"
               >
                 <span className="block text-xl font-medium text-gray-600 group-hover:text-brand-600 transition-colors">
                   家具
                 </span>
-                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-brand-600 transition-all group-hover:w-full"></span>
+                {/* <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-brand-600 transition-all group-hover:w-full"></span> */}
+              </Link>
+              <Link
+                href="/products/lighting"
+                className="group block relative py-2"
+              >
+                <span className="block text-xl font-medium text-brand-600">
+                  灯具
+                </span>
+                {/* <span className="absolute bottom-0 left-0 w-8 h-0.5 bg-brand-600 transition-all group-hover:w-full"></span> */}
               </Link>
               <Link
                 href="/products/decor"
@@ -122,7 +122,7 @@ const ProductShowcase = () => {
                 <span className="block text-xl font-medium text-gray-600 group-hover:text-brand-600 transition-colors">
                   配饰
                 </span>
-                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-brand-600 transition-all group-hover:w-full"></span>
+                {/* <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-brand-600 transition-all group-hover:w-full"></span> */}
               </Link>
             </nav>
           </div>
@@ -151,7 +151,7 @@ const ProductShowcase = () => {
                       products[currentSlide].introduce ||
                       products[currentSlide].designer
                         ? {
-                            borderBottom: '1px solid #235A5A',
+                            borderBottom: "1px solid #235A5A",
                           }
                         : {}
                     }
@@ -187,8 +187,8 @@ const ProductShowcase = () => {
                     onClick={() => setCurrentSlide(index)}
                     className={`w-2 h-2 rounded-full transition-all ${
                       currentSlide === index
-                        ? 'bg-brand-600 w-6'
-                        : 'bg-white/50 hover:bg-white/80'
+                        ? "bg-brand-600 w-6"
+                        : "bg-white/50 hover:bg-white/80"
                     }`}
                   />
                 ))}
@@ -198,7 +198,7 @@ const ProductShowcase = () => {
         </div>
       </div>
     </section>
-  )
-}
+  );
+};
 
-export default ProductShowcase
+export default ProductShowcase;

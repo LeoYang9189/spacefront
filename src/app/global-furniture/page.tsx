@@ -22,6 +22,7 @@ const GlobalFurniture = () => {
         pageSize: ITEMS_PER_PAGE,
       });
       if (err) return;
+
       setBrandList(res.records.filter((item: any) => item.effectiveFlag));
     };
     getBrandListData();

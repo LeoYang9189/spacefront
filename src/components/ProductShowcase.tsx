@@ -48,7 +48,7 @@ const ProductShowcase = () => {
     const getBanner2ListData = async () => {
       const [err, list] = await tryCatch(getBanner2List);
       if (err) return;
-      setProducts(list.filter((item: any) => item.status));
+      setProducts(list.filter((item: any) => item.status !== false));
       setMounted(true);
     };
     getBanner2ListData();

@@ -26,7 +26,7 @@ const HeroBanner = () => {
     const getBannerListData = async () => {
       const [err, list] = await tryCatch(getBannerList);
       if (err) return;
-      setBannerList(list.filter((item: any) => item.status));
+      setBannerList(list.filter((item: any) => item.status !== false));
       setMounted(true);
     };
     getBannerListData();

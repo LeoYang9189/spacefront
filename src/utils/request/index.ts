@@ -1,4 +1,5 @@
 import axios, { AxiosResponse } from "axios";
+import { env, logEnvInDevelopment } from "@/config/env";
 
 interface ApiResponse<T> {
   code: number;
@@ -6,9 +7,12 @@ interface ApiResponse<T> {
   message: string;
 }
 
+// 在开发环境下打印环境变量
+logEnvInDevelopment();
+
 const service = axios.create({
-  baseURL: "http://8.149.244.70:8080",
-  timeout: 15000,
+  baseURL: env.apiBaseUrl,
+  timeout: env.apiTimeout,
 });
 
 service.interceptors.request.use(

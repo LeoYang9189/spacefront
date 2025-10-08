@@ -153,7 +153,7 @@ export default function ProductDetail() {
           {/* 商品参数 */}
           <section className="mb-16">
             <h2 className="text-2xl font-bold text-gray-900 mb-8">商品参数</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl">
               <div className="flex items-center gap-4 bg-white p-4 rounded-lg">
                 <span className="text-gray-500">材质</span>
                 <span className="text-gray-900">
@@ -176,6 +176,18 @@ export default function ProductDetail() {
                 <span className="text-gray-500">颜色</span>
                 <span className="text-gray-900">
                   {productDetail?.productParameter["颜色"]}
+                </span>
+              </div>
+              <div className="flex items-center gap-4 bg-white p-4 rounded-lg">
+                <span className="text-gray-500">品牌国</span>
+                <span className="text-gray-900">
+                  {productDetail?.productParameter["品牌国"]}
+                </span>
+              </div>
+              <div className="flex items-center gap-4 bg-white p-4 rounded-lg">
+                <span className="text-gray-500">原产地</span>
+                <span className="text-gray-900">
+                  {productDetail?.productParameter["原产地"]}
                 </span>
               </div>
             </div>

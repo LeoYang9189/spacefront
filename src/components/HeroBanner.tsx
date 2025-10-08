@@ -81,7 +81,7 @@ const HeroBanner = () => {
         }
       `}</style>
       <Slider {...settings} className="h-full">
-        {bannerList.map((banner, index) => (
+        {[bannerList[1]].map((banner, index) => (
           <div key={index} className="relative h-full w-full">
             <motion.div
               className="relative h-full w-full"
@@ -103,7 +103,7 @@ const HeroBanner = () => {
               />
             </motion.div>
             <div className="absolute inset-0 z-10">
-              <motion.div
+              {/* <motion.div
                 className="absolute inset-0 bg-gradient-to-r from-[#235A5A]/50 to-transparent"
                 initial={{ x: slideDirection * 50 + "%", opacity: 0 }}
                 animate={{
@@ -114,7 +114,7 @@ const HeroBanner = () => {
                 style={{
                   clipPath: "polygon(0 0, 45% 0, 35% 100%, 0 100%)",
                 }}
-              />
+              /> */}
             </div>
             <div className="absolute inset-0 z-20 flex flex-col justify-center px-8 md:px-16 lg:px-24">
               <motion.div key={index} className="max-w-3xl relative">

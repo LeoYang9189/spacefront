@@ -76,7 +76,7 @@ export default function BrandDetail() {
             查看产品图册
           </a>
           <a
-            href={detailInfo.officialWebsiteLink}
+            href={detailInfo.brandWebsiteLink}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center justify-center px-8 py-4 border-2 border-brand-600 text-brand-600 rounded-full hover:bg-brand-600 hover:text-white transition-colors text-lg font-medium min-w-[200px] cursor-pointer"

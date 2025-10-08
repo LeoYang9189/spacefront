@@ -84,12 +84,12 @@ const ProductShowcase = () => {
           <h2 className="text-brand-600 text-4xl font-bold mb-2">Product</h2>
           <div className="flex items-end gap-4 border-b border-gray-100 pb-2">
             <h3 className="text-3xl font-bold text-brand-600">设计严选</h3>
-            <div className="relative">
+            {/* <div className="relative">
               <p className="text-lg font-bold text-brand-400 mb-1">
                 毫不费力 创意开关
               </p>
               <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-brand-400/50 to-transparent"></div>
-            </div>
+            </div> */}
           </div>
         </div>
 

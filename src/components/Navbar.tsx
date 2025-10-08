@@ -48,7 +48,7 @@ const Navbar: React.FC = () => {
 
   return (
     <nav
-      className={`fixed w-full z-50 transition-all duration-300 bg-white shadow-sm`}
+      className={`sticky top-0 w-full z-50 transition-all duration-300 bg-white shadow-sm`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
@@ -82,12 +82,12 @@ const Navbar: React.FC = () => {
               ))}
             </div>
             {/* Login/Register Button */}
-            <motion.div
+            {/* <motion.div
               className="ml-8"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              {/* <Link
+              <Link
                 href="/auth"
                 className="group relative inline-flex items-center justify-center overflow-hidden rounded-md px-10 py-2.5"
               >
@@ -98,7 +98,7 @@ const Navbar: React.FC = () => {
                 <span className="relative text-sm font-medium text-white tracking-wide transition-all duration-300 group-hover:tracking-wider">
                   登录/注册
                 </span>
-              </Link> */}
+              </Link>
               <Avatar
                 showFallback
                 src={userInfo?.avatar}
@@ -106,7 +106,7 @@ const Navbar: React.FC = () => {
                   icon: "text-[#1C4848]",
                 }}
               />
-            </motion.div>
+            </motion.div> */}
           </div>
 
           {/* Mobile Menu Button */}

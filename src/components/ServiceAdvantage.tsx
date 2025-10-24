@@ -44,9 +44,7 @@ const ServiceAdvantage = () => {
           >
             <h3 className="text-3xl font-bold">服务优势</h3>
             <div className="relative">
-              <p className="text-lg font-bold text-white/80 mb-1">
-                全球甄选 合作省心
-              </p>
+
               <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-white/50 to-transparent"></div>
             </div>
           </motion.div>

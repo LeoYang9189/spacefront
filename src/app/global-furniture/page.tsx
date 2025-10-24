@@ -8,7 +8,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { getBrandList } from "@/api/stock";
 import { tryCatch } from "@/utils/util";
 
-const ITEMS_PER_PAGE = 6;
+const ITEMS_PER_PAGE = 999;
 
 const GlobalFurniture = () => {
   const [brandList, setBrandList] = useState([]);

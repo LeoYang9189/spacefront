@@ -17,18 +17,18 @@ import { arr2Obj, LargeCategoryConfig } from "@/enums/products";
 import useStore from "@/store/useStore";
 import { fetchTags } from "@/api/tags";
 
-// 样式定义
+// 样式定义 - 移除滚动限制
 const scrollContainerStyle = {
-  maxHeight: "calc(100vh - 300px)",
-  overflowY: "auto" as const,
+  // maxHeight: "calc(100vh - 300px)",
+  // overflowY: "auto" as const,
 };
 
 // 新增枚举配置
 const STATUS_OPTIONS = [
-  { value: "现货", label: "现货" },
-  { value: "在途", label: "在途" },
-  { value: "期货", label: "期货" },
-  { value: "特价", label: "特价" },
+  { value: "1", label: "现货" },
+  { value: "2", label: "在途" },
+  { value: "3", label: "期货" },
+  { value: "4", label: "特价" },
 ];
 
 const FilterSection = ({
@@ -79,14 +79,14 @@ const FilterSection = ({
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <div className="space-y-3 pt-3 max-h-[108px] overflow-y-auto">
+            <div className="space-y-3 pt-3 max-h-[312px] overflow-y-auto">
               {Array.isArray(items) &&
                 items.map((item) => (
                   <label
                     key={item.category || item.value}
-                    className="flex items-center group cursor-pointer"
+                    className="flex items-center group cursor-pointer py-1"
                   >
-                    <div className="relative flex items-center">
+                    <div className="relative flex items-center p-1">
                       <input
                         type={isRadio ? "radio" : "checkbox"}
                         name={isRadio ? "mainCategory" : undefined}
@@ -101,16 +101,19 @@ const FilterSection = ({
                         className={`
                         ${isRadio ? "form-radio" : "form-checkbox"}
                         w-5 h-5
-                        border
+                        border-2
                         border-brand-300
                         text-brand-600
                         focus:ring-brand-500
                         focus:ring-2
                         focus:ring-offset-2
-                        rounded-${isRadio ? "full" : "md"}
+                        ${isRadio ? "rounded-full" : "rounded-md"}
                         transition-all
                         duration-200
                         ease-in-out
+                        checked:bg-brand-600
+                        checked:border-brand-600
+                        hover:border-brand-400
                       `}
                       />
                     </div>
@@ -185,7 +188,7 @@ const ProductListPage = ({ params }: { params: { category: string } }) => {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedTags, setSelectedTags] = useState<{[key: string]: string[]}>({});
   const [productList, setProductList] = useState<any[]>([]);
   const [total, setTotal] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -198,7 +201,7 @@ const ProductListPage = ({ params }: { params: { category: string } }) => {
   const [tags, setTags] = useState<any[]>([]);
   const getTags = async () => {
     const res = await fetchTags();
-    const category = LargeCategoryConfig[selectedMainCategory];
+    const category = LargeCategoryConfig[selectedMainCategory as keyof typeof LargeCategoryConfig];
 
     const tags = res.reduce((acc: any, item: any) => {
       if (item.category.includes(category)) {
@@ -221,7 +224,7 @@ const ProductListPage = ({ params }: { params: { category: string } }) => {
   const getBrands = async () => {
     const res = await getBrandList({
       pageNum: 1,
-      pageSize: 99999,
+      pageSize: 999,
     });
     const arr = res.records.map((v: any) => ({
       label: v.brandName,
@@ -244,12 +247,14 @@ const ProductListPage = ({ params }: { params: { category: string } }) => {
 
   const getList = debounce(async function () {
     if (!categoryObj[selectedMainCategory]) return;
+    // 将标签对象转换为扁平数组
+    const allSelectedTags = Object.values(selectedTags).flat();
     getProductList({
       largeCategory: categoryObj[selectedMainCategory].categoryLabel,
       categories: selectedCategories,
       brand: selectedBrands,
-      status: selectedStatus,
-      tags: selectedTags,
+      productStatus: selectedStatus,
+      tags: allSelectedTags,
       pageNum: 1,
       pageSize: 99999,
     }).then((res) => {
@@ -274,7 +279,7 @@ const ProductListPage = ({ params }: { params: { category: string } }) => {
       setSelectedCategories([]);
       setSelectedBrands([]);
       setSelectedStatus([]);
-      setSelectedTags([]);
+      setSelectedTags({});
     }
   }, [categoryObj, selectedMainCategory]);
 
@@ -313,13 +318,13 @@ const ProductListPage = ({ params }: { params: { category: string } }) => {
 
   // 处理品牌多选
   const handleBrandChange = (brand: {
-    category: string;
-    categoryLabel: string;
+    label: string;
+    value: string;
   }) => {
     setSelectedBrands((prev) =>
-      prev.includes(brand.category)
-        ? prev.filter((b) => b !== brand.category)
-        : [...prev, brand.category]
+      prev.includes(brand.value)
+        ? prev.filter((b) => b !== brand.value)
+        : [...prev, brand.value]
     );
   };
 
@@ -333,10 +338,13 @@ const ProductListPage = ({ params }: { params: { category: string } }) => {
   };
 
   // 处理功能标签多选
-  const handleTagChange = (tag: { value: string; label: string }) => {
-    setSelectedTags((prev) => {
-      return [...new Set([...prev, tag.value])];
-    });
+  const handleTagChange = (tag: { value: string; label: string }, tagType: string) => {
+    setSelectedTags((prev) => ({
+      ...prev,
+      [tagType]: prev[tagType]?.includes(tag.value)
+        ? prev[tagType].filter((t) => t !== tag.value)
+        : [...(prev[tagType] || []), tag.value]
+    }));
   };
 
   // 处理大类切换
@@ -358,9 +366,8 @@ const ProductListPage = ({ params }: { params: { category: string } }) => {
       setSelectedBrands((prev) => prev.filter((b) => b !== value));
     } else if (type === "status") {
       setSelectedStatus((prev) => prev.filter((s) => s !== value));
-    } else if (type === "tag") {
-      setSelectedTags((prev) => prev.filter((t) => t !== value));
     }
+    // 标签的移除逻辑现在在渲染部分直接处理
   };
 
   // 处理页码变化
@@ -438,7 +445,7 @@ const ProductListPage = ({ params }: { params: { category: string } }) => {
                   items={categoryList.reduce((acc, category) => {
                     if (
                       category.largeCategoryLabel ===
-                      LargeCategoryConfig[selectedMainCategory]
+                      LargeCategoryConfig[selectedMainCategory as keyof typeof LargeCategoryConfig]
                     ) {
                       acc.push({
                         category: category.name,
@@ -459,10 +466,10 @@ const ProductListPage = ({ params }: { params: { category: string } }) => {
                   <FilterSection
                     key={key}
                     title={key}
-                    items={tags[key]}
-                    selectedItems={selectedTags}
-                    onChange={(item) => handleTagChange(item)}
-                    onClear={() => setSelectedTags([])}
+                    items={tags[key as keyof typeof tags]}
+                    selectedItems={selectedTags[key] || []}
+                    onChange={(item) => handleTagChange(item, key)}
+                    onClear={() => setSelectedTags(prev => ({...prev, [key]: []}))}
                   />
                 );
               })}
@@ -487,30 +494,34 @@ const ProductListPage = ({ params }: { params: { category: string } }) => {
               {(selectedCategories.length > 0 ||
                 selectedBrands.length > 0 ||
                 selectedStatus.length > 0 ||
-                selectedTags.length > 0) && (
+                Object.values(selectedTags).some(tags => tags.length > 0)) && (
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   className="mb-6 flex flex-wrap gap-2"
                 >
-                  {selectedStatus.map((status) => (
-                    <motion.span
-                      key={status}
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                      className="inline-flex items-center px-3 py-1.5 rounded-full text-sm bg-brand-50 text-brand-600 border border-brand-100"
-                    >
-                      状态: {status}
-                      <button
-                        onClick={() => removeFilter("status", status)}
-                        className="ml-2 text-brand-400 hover:text-brand-600 transition-colors"
+                  {selectedStatus.map((status) => {
+                    // 将数值转换为中文显示
+                    const statusLabel = STATUS_OPTIONS.find(option => option.value === status)?.label || status;
+                    return (
+                      <motion.span
+                        key={status}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        className="inline-flex items-center px-3 py-1.5 rounded-full text-sm bg-brand-50 text-brand-600 border border-brand-100"
                       >
-                        <XMarkIcon className="h-4 w-4" />
-                      </button>
-                    </motion.span>
-                  ))}
+                        状态: {statusLabel}
+                        <button
+                          onClick={() => removeFilter("status", status)}
+                          className="ml-2 text-brand-400 hover:text-brand-600 transition-colors"
+                        >
+                          <XMarkIcon className="h-4 w-4" />
+                        </button>
+                      </motion.span>
+                    );
+                  })}
                   {selectedCategories.map((category) => (
                     <motion.span
                       key={category}
@@ -528,23 +539,30 @@ const ProductListPage = ({ params }: { params: { category: string } }) => {
                       </button>
                     </motion.span>
                   ))}
-                  {selectedTags.map((tag) => (
-                    <motion.span
-                      key={tag}
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                      className="inline-flex items-center px-3 py-1.5 rounded-full text-sm bg-brand-50 text-brand-600 border border-brand-100"
-                    >
-                      标签: {tag}
-                      <button
-                        onClick={() => removeFilter("tag", tag)}
-                        className="ml-2 text-brand-400 hover:text-brand-600 transition-colors"
+                  {Object.entries(selectedTags).map(([tagType, tags]) =>
+                    tags.map((tag) => (
+                      <motion.span
+                        key={`${tagType}-${tag}`}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        className="inline-flex items-center px-3 py-1.5 rounded-full text-sm bg-brand-50 text-brand-600 border border-brand-100"
                       >
-                        <XMarkIcon className="h-4 w-4" />
-                      </button>
-                    </motion.span>
-                  ))}
+                        标签: {tag}
+                        <button
+                          onClick={() => {
+                            setSelectedTags(prev => ({
+                              ...prev,
+                              [tagType]: prev[tagType]?.filter(t => t !== tag) || []
+                            }));
+                          }}
+                          className="ml-2 text-brand-400 hover:text-brand-600 transition-colors"
+                        >
+                          <XMarkIcon className="h-4 w-4" />
+                        </button>
+                      </motion.span>
+                    ))
+                  )}
                   {selectedBrands.map((brand) => (
                     <motion.span
                       key={brand}

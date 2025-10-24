@@ -4,10 +4,12 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FaQrcode, FaHeadset, FaHome, FaArrowUp } from 'react-icons/fa';
 import Image from 'next/image';
+import useStore from '@/store/useStore';
 
 const FloatingActions = () => {
   const [showQRCode, setShowQRCode] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const { companyInfo } = useStore();
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -32,38 +34,83 @@ const FloatingActions = () => {
             <FaQrcode size={24} />
           </button>
           
-          {/* 二维码弹出框 */}
-          {showQRCode && !isDragging && (
-            <div 
-              className="absolute right-full top-1/2 -translate-y-1/2 mr-4 bg-white p-4 rounded-xl shadow-xl flex gap-4"
-              style={{ width: '320px' }}
-            >
+          {/* 二维码弹出框 - 始终渲染，只控制显示隐藏 */}
+          <div 
+            className={`absolute right-full top-1/2 -translate-y-1/2 mr-4 bg-white p-4 rounded-xl shadow-xl flex gap-4 transition-opacity duration-200 ${
+              showQRCode && !isDragging ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+            }`}
+            style={{ width: '320px' }}
+          >
+            {/* 第一个二维码 - 从API获取 */}
+            {companyInfo?.qrcodeList?.[0]?.url && (
               <div className="text-center">
                 <div className="w-32 h-32 bg-gray-50 p-2 rounded-lg mb-2">
                   <Image
-                    src="/qr-weixin.jpg"
-                    alt="官方微信"
+                    src={companyInfo.qrcodeList[0].url}
+                    alt={companyInfo.qrcodeList[0].name || "官方微信"}
                     width={112}
                     height={112}
                     className="w-full h-full"
+                    priority
                   />
                 </div>
-                <p className="text-sm text-gray-600">官方微信</p>
+                <p className="text-sm text-gray-600">
+                  {companyInfo.qrcodeList[0].name || "官方微信"}
+                </p>
               </div>
+            )}
+            
+            {/* 第二个二维码 - 从API获取 */}
+            {companyInfo?.qrcodeList?.[1]?.url && (
               <div className="text-center">
                 <div className="w-32 h-32 bg-gray-50 p-2 rounded-lg mb-2">
                   <Image
-                    src="/qr-web.jpg"
-                    alt="官方商城"
+                    src={companyInfo.qrcodeList[1].url}
+                    alt={companyInfo.qrcodeList[1].name || "官方商城"}
                     width={112}
                     height={112}
                     className="w-full h-full"
+                    priority
                   />
                 </div>
-                <p className="text-sm text-gray-600">官方商城</p>
+                <p className="text-sm text-gray-600">
+                  {companyInfo.qrcodeList[1].name || "官方商城"}
+                </p>
               </div>
-            </div>
-          )}
+            )}
+            
+            {/* 如果没有API数据，显示默认二维码 */}
+            {(!companyInfo?.qrcodeList?.[0]?.url && !companyInfo?.qrcodeList?.[1]?.url) && (
+              <>
+                <div className="text-center">
+                  <div className="w-32 h-32 bg-gray-50 p-2 rounded-lg mb-2">
+                    <Image
+                      src="/qr-weixin.jpg"
+                      alt="官方微信"
+                      width={112}
+                      height={112}
+                      className="w-full h-full"
+                      priority
+                    />
+                  </div>
+                  <p className="text-sm text-gray-600">官方微信</p>
+                </div>
+                <div className="text-center">
+                  <div className="w-32 h-32 bg-gray-50 p-2 rounded-lg mb-2">
+                    <Image
+                      src="/qr-web.jpg"
+                      alt="官方商城"
+                      width={112}
+                      height={112}
+                      className="w-full h-full"
+                      priority
+                    />
+                  </div>
+                  <p className="text-sm text-gray-600">官方商城</p>
+                </div>
+              </>
+            )}
+          </div>
         </div>
 
         {/* 客服电话 */}

@@ -201,16 +201,14 @@ const ProductListPage = ({ params }: { params: { category: string } }) => {
   const [tags, setTags] = useState<any[]>([]);
   const getTags = async () => {
     const res = await fetchTags();
-    const category = LargeCategoryConfig[selectedMainCategory as keyof typeof LargeCategoryConfig];
 
     const tags = res.reduce((acc: any, item: any) => {
-      if (item.category.includes(category)) {
-        if (!acc[item.type]) {
-          acc[item.type] = [];
-        }
-        const single = { label: item.name, value: item.name };
-        acc[item.type].push(single);
+      // 移除大类过滤，全量显示所有标签
+      if (!acc[item.type]) {
+        acc[item.type] = [];
       }
+      const single = { label: item.name, value: item.name };
+      acc[item.type].push(single);
       return acc;
     }, {});
     setTags(tags);
@@ -218,7 +216,7 @@ const ProductListPage = ({ params }: { params: { category: string } }) => {
 
   useEffect(() => {
     getTags();
-  }, [selectedMainCategory]);
+  }, []); // 移除依赖，只在组件初始化时加载一次
 
   const [brands, setBrands] = useState<any[]>([]);
   const getBrands = async () => {

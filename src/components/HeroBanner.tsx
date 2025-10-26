@@ -44,6 +44,7 @@ const HeroBanner = () => {
     arrows: false,
     swipe: true,
     draggable: true,
+    pauseOnHover: true,
     cssEase: "cubic-bezier(0.4, 0, 0.2, 1)",
     beforeChange: (oldIndex: number, newIndex: number) => {
       setSlideDirection(newIndex > oldIndex ? -1 : 1);
@@ -81,7 +82,7 @@ const HeroBanner = () => {
         }
       `}</style>
       <Slider {...settings} className="h-full">
-        {[bannerList[1]].map((banner, index) => (
+        {bannerList.map((banner, index) => (
           <div key={index} className="relative h-full w-full">
             <motion.div
               className="relative h-full w-full"

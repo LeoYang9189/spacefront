@@ -119,7 +119,7 @@ const FloatingActions = () => {
             <FaHeadset size={24} />
           </button>
           <div className="absolute right-full top-1/2 -translate-y-1/2 mr-4 bg-white px-4 py-2 rounded-lg shadow-lg pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-            <p className="text-brand-600 font-medium">021-61259481</p>
+            <p className="text-brand-600 font-medium">{companyInfo?.phone}</p>
           </div>
         </div>
 

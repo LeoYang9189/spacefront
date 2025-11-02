@@ -3,6 +3,7 @@ import request from "@/utils/request";
 interface ProductDetail {
   productName: string;
   subProductName: string;
+  retailPrice?: number | string; // 零售价：商品的零售价格，单位为元
   productBlurb: string;
   productCoverImageList: string[];
   productParameter: Record<string, string>;

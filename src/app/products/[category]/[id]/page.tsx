@@ -8,6 +8,21 @@ import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { getProductDetail, getProductRecommend } from "@/api/stock";
 import { tryCatch } from "@/utils/util";
 
+// 格式化价格：整数不显示 .00，只有小数时才显示
+const formatPrice = (price: number | string | undefined | null): string => {
+  if (!price && price !== 0) return "";
+  const num = parseFloat(String(price));
+  if (isNaN(num)) return "";
+  
+  // 如果是整数，直接返回整数
+  if (num % 1 === 0) {
+    return num.toString();
+  }
+  
+  // 如果有小数，去掉末尾的0
+  return num.toString().replace(/\.?0+$/, "");
+};
+
 export default function ProductDetail() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [productImages, setProductImages] = useState<string[]>([]);
@@ -113,9 +128,16 @@ export default function ProductDetail() {
               <h1 className="text-3xl font-bold text-gray-900 mb-2">
                 {productDetail?.productName}
               </h1>
-              <p className="text-xl text-brand-600">
+              {/* 副标题字段已注释 */}
+              {/* <p className="text-xl text-brand-600">
                 {productDetail?.subProductName}
-              </p>
+              </p> */}
+              {/* 零售价：商品的零售价格，单位为元 */}
+              {productDetail?.retailPrice && (
+                <p className="text-2xl font-bold text-red-600 mt-2">
+                  ￥{formatPrice(productDetail.retailPrice)}
+                </p>
+              )}
             </div>
 
             <div className="space-y-4">

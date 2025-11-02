@@ -75,6 +75,8 @@ export default function AboutPage() {
         className="container mx-auto px-4 py-12"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {/* 展厅图片应该从 companyInfo.showroomImageList 获取，但此页面没有引入 useStore */}
+          {/* 如果需要在 about 页面也显示，需要添加 useStore 引入 */}
           {[1, 2, 3, 4, 5, 6].map((index) => (
             <motion.div
               key={index}
@@ -86,6 +88,7 @@ export default function AboutPage() {
                 alt={`展厅图片 ${index}`}
                 fill
                 className="object-cover transition-transform duration-500 group-hover:scale-110"
+                unoptimized
               />
               <div className="absolute inset-0 bg-black bg-opacity-20 transition-opacity duration-300 group-hover:bg-opacity-30" />
             </motion.div>

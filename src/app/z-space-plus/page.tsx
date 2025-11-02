@@ -119,25 +119,33 @@ export default function ZSpacePlusPage() {
       >
         <h3 className="text-2xl text-center mb-10 text-white">展厅实景</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
-          {[1, 2, 3, 4, 5, 6].map((index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="relative h-48 overflow-hidden rounded-lg group"
-            >
-              <Image
-                src={`/about/image${index}.jpg`}
-                alt={`展厅照片 ${index}`}
-                fill
-                className="object-cover transition-transform duration-300 group-hover:scale-105"
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            </motion.div>
-          ))}
+          {companyInfo?.showroomImageList && companyInfo.showroomImageList.length > 0 ? (
+            companyInfo.showroomImageList.map((image: any, index: number) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="relative h-48 overflow-hidden rounded-lg group"
+              >
+                <Image
+                  src={image.url || ''}
+                  alt={`展厅照片 ${index + 1}`}
+                  fill
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  unoptimized
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              </motion.div>
+            ))
+          ) : (
+            // 降级方案：如果没有配置图片，显示占位提示
+            <div className="col-span-full text-center text-white/60 py-8">
+              暂无展厅实景图片
+            </div>
+          )}
         </div>
       </motion.div>
 

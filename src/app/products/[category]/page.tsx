@@ -9,7 +9,25 @@ import {
   ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  ArrowsPointingInIcon,
+  ArrowsPointingOutIcon,
 } from "@heroicons/react/24/outline";
+
+// 格式化价格：整数不显示 .00，只有小数时才显示
+const formatPrice = (price: number | string | undefined | null): string => {
+  if (!price && price !== 0) return "";
+  const num = parseFloat(String(price));
+  if (isNaN(num)) return "";
+  
+  // 如果是整数，直接返回整数
+  if (num % 1 === 0) {
+    return num.toString();
+  }
+  
+  // 如果有小数，去掉末尾的0
+  return num.toString().replace(/\.?0+$/, "");
+};
+
 import { motion, AnimatePresence } from "framer-motion";
 import { getProductList, getBrandList } from "@/api/stock";
 import { fetchClassification } from "@/api/common";
@@ -38,6 +56,9 @@ const FilterSection = ({
   onChange,
   isRadio = false,
   onClear,
+  globalExpanded,
+  localExpandedOverride,
+  onLocalToggle,
 }: {
   title: string;
   items: Array<any>;
@@ -45,14 +66,41 @@ const FilterSection = ({
   onChange: (item: any) => void;
   isRadio?: boolean;
   onClear?: () => void;
+  globalExpanded?: boolean;
+  localExpandedOverride?: boolean;
+  onLocalToggle?: () => void;
 }) => {
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [localExpanded, setLocalExpanded] = useState(true);
+  
+  // 优先使用本地覆盖状态，然后是全局状态，最后是本地状态
+  const isExpanded = localExpandedOverride !== undefined 
+    ? localExpandedOverride 
+    : (globalExpanded !== undefined ? globalExpanded : localExpanded);
+  
+  // 单个区域的展开/折叠只影响自己
+  const handleToggle = () => {
+    if (onLocalToggle) {
+      // 调用外部提供的切换函数
+      onLocalToggle();
+    } else {
+      // 如果没有外部控制，使用内部状态
+      setLocalExpanded(!localExpanded);
+    }
+  };
+  
+  // 当全局状态改变时，如果该区域没有独立的展开状态，则同步本地状态
+  useEffect(() => {
+    // 只有当没有本地覆盖状态时，才跟随全局状态
+    if (globalExpanded !== undefined && localExpandedOverride === undefined) {
+      setLocalExpanded(globalExpanded);
+    }
+  }, [globalExpanded, localExpandedOverride]);
 
   return (
     <div className="border-b border-brand-100 pb-6">
       <div className="flex items-center justify-between py-3">
         <button
-          onClick={() => setIsExpanded(!isExpanded)}
+          onClick={handleToggle}
           className="flex items-center text-brand-600 hover:text-brand-700 transition-colors"
         >
           <span className="text-lg font-medium">{title}</span>
@@ -198,6 +246,11 @@ const ProductListPage = ({ params }: { params: { category: string } }) => {
     brands: [] as string[],
   });
 
+  // 全局折叠/展开状态
+  const [allSectionsExpanded, setAllSectionsExpanded] = useState(true);
+  // 每个区域的独立展开状态（用于覆盖全局状态）
+  const [sectionExpandedStates, setSectionExpandedStates] = useState<{[key: string]: boolean}>({});
+  
   const [tags, setTags] = useState<any[]>([]);
   const getTags = async () => {
     const res = await fetchTags();
@@ -420,11 +473,30 @@ const ProductListPage = ({ params }: { params: { category: string } }) => {
 
         <div className="flex gap-8">
           {/* 左侧筛选栏 */}
-          <div className="w-72 flex-shrink-0">
+          <div className="w-72 flex-shrink-0 relative group">
             <div
               className="bg-white rounded-xl shadow-sm border border-brand-100 p-6"
               style={scrollContainerStyle}
             >
+              {/* 一键折叠/展开按钮 */}
+              <div className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                  onClick={() => {
+                    setAllSectionsExpanded(!allSectionsExpanded);
+                    // 清空所有区域的独立状态，让它们跟随全局状态
+                    setSectionExpandedStates({});
+                  }}
+                  className="p-2 rounded-lg bg-brand-50 hover:bg-brand-100 text-brand-600 transition-colors shadow-sm"
+                  title={allSectionsExpanded ? "一键折叠" : "一键展开"}
+                >
+                  {allSectionsExpanded ? (
+                    <ArrowsPointingInIcon className="w-5 h-5" />
+                  ) : (
+                    <ArrowsPointingOutIcon className="w-5 h-5" />
+                  )}
+                </button>
+              </div>
+
               {/* 大类筛选 */}
               <FilterSection
                 title="大类"
@@ -434,6 +506,14 @@ const ProductListPage = ({ params }: { params: { category: string } }) => {
                   return handleMainCategoryChange(category);
                 }}
                 isRadio={true}
+                globalExpanded={allSectionsExpanded}
+                localExpandedOverride={sectionExpandedStates['大类']}
+                onLocalToggle={() => {
+                  setSectionExpandedStates(prev => ({
+                    ...prev,
+                    '大类': !(prev['大类'] ?? allSectionsExpanded)
+                  }));
+                }}
               />
 
               {/* 品类筛选 */}
@@ -455,6 +535,14 @@ const ProductListPage = ({ params }: { params: { category: string } }) => {
                   selectedItems={selectedCategories}
                   onChange={(item) => handleCategoryChange(item)}
                   onClear={() => setSelectedCategories([])}
+                  globalExpanded={allSectionsExpanded}
+                  localExpandedOverride={sectionExpandedStates['品类']}
+                  onLocalToggle={() => {
+                    setSectionExpandedStates(prev => ({
+                      ...prev,
+                      '品类': !(prev['品类'] ?? allSectionsExpanded)
+                    }));
+                  }}
                 />
               )}
 
@@ -468,6 +556,14 @@ const ProductListPage = ({ params }: { params: { category: string } }) => {
                     selectedItems={selectedTags[key] || []}
                     onChange={(item) => handleTagChange(item, key)}
                     onClear={() => setSelectedTags(prev => ({...prev, [key]: []}))}
+                    globalExpanded={allSectionsExpanded}
+                    localExpandedOverride={sectionExpandedStates[key]}
+                    onLocalToggle={() => {
+                      setSectionExpandedStates(prev => ({
+                        ...prev,
+                        [key]: !(prev[key] ?? allSectionsExpanded)
+                      }));
+                    }}
                   />
                 );
               })}
@@ -480,6 +576,14 @@ const ProductListPage = ({ params }: { params: { category: string } }) => {
                   selectedItems={selectedBrands}
                   onChange={(item) => handleBrandChange(item)}
                   onClear={() => setSelectedBrands([])}
+                  globalExpanded={allSectionsExpanded}
+                  localExpandedOverride={sectionExpandedStates['品牌']}
+                  onLocalToggle={() => {
+                    setSectionExpandedStates(prev => ({
+                      ...prev,
+                      '品牌': !(prev['品牌'] ?? allSectionsExpanded)
+                    }));
+                  }}
                 />
               )}
             </div>
@@ -588,7 +692,7 @@ const ProductListPage = ({ params }: { params: { category: string } }) => {
                 <Link
                   key={product.id}
                   href={`/products/${selectedMainCategory}/${product.id}`}
-                  className="block"
+                  className="block group"
                 >
                   <motion.div
                     whileHover={{ y: -5 }}
@@ -611,6 +715,12 @@ const ProductListPage = ({ params }: { params: { category: string } }) => {
                         {product.productName}
                       </h3>
                       <p className="text-sm text-brand-600">{product.brand}</p>
+                      {/* 零售价：商品的零售价格，单位为元 */}
+                      {product.retailPrice && (
+                        <p className="text-lg font-bold text-red-600 mt-2">
+                          ￥{formatPrice(product.retailPrice)}
+                        </p>
+                      )}
                     </div>
                   </motion.div>
                 </Link>

@@ -13,6 +13,7 @@ const ITEMS_PER_PAGE = 999;
 const GlobalFurniture = () => {
   const [brandList, setBrandList] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
   const totalPages = Math.ceil(brandList.length / ITEMS_PER_PAGE);
 
   useEffect(() => {
@@ -62,14 +63,47 @@ const GlobalFurniture = () => {
                 className="group relative"
               >
                 <Link href={`/brands/detail/${brand.id}`} className="block">
-                  {/* 图片容器 */}
-                  <div className="relative aspect-[4/3] overflow-hidden rounded-lg">
-                    <Image
-                      src={brand.brandLogo}
-                      alt={brand.brandName}
-                      fill
-                      className="object-cover transform group-hover:scale-105 transition-transform duration-500"
-                    />
+                  {/* 图片容器 - 使用兼容性更好的方式实现 aspect-ratio */}
+                  <div 
+                    className="relative overflow-hidden rounded-lg"
+                    style={{
+                      width: '100%',
+                      paddingTop: '75%', // 4:3 比例 (3/4 = 0.75)
+                      position: 'relative'
+                    }}
+                  >
+                    {!imageErrors[brand.id] ? (
+                      <Image
+                        src={brand.brandLogo || ''}
+                        alt={brand.brandName || ''}
+                        fill
+                        className="object-cover transform group-hover:scale-105 transition-transform duration-500"
+                        onError={() => {
+                          setImageErrors(prev => ({ ...prev, [brand.id]: true }));
+                        }}
+                        unoptimized
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      />
+                    ) : (
+                      // 降级到原生 img 标签，提高浏览器兼容性
+                      <img
+                        src={brand.brandLogo || ''}
+                        alt={brand.brandName || ''}
+                        className="absolute top-0 left-0 w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          height: '100%',
+                        }}
+                        onError={(e) => {
+                          // 如果图片加载失败，设置为占位图
+                          const target = e.target as HTMLImageElement;
+                          target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect width="100%25" height="100%25" fill="%23f3f4f6"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%239ca3af" font-size="16"%3E图片加载失败%3C/text%3E%3C/svg%3E';
+                        }}
+                      />
+                    )}
                     {/* 渐变遮罩 */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </div>
@@ -79,9 +113,10 @@ const GlobalFurniture = () => {
                     <h3 className="text-2xl font-bold mb-2">
                       {brand.brandName}
                     </h3>
-                    <p className="text-sm text-white/90 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    {/* 副标题字段已注释 */}
+                    {/* <p className="text-sm text-white/90 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                       {brand.subProductName}
-                    </p>
+                    </p> */}
                   </div>
                 </Link>
               </motion.div>

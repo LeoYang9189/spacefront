@@ -19,7 +19,7 @@ export const CategoryConfig = [
   },
   {
     category: "decor",
-    categoryLabel: "饰品",
+    categoryLabel: "配饰",
     categories: ["装饰摆件", "挂画", "地毯", "抱枕"],
     brands: ["&Tradition", "Menu", "Vitra", "Hay"],
   },
@@ -32,7 +32,7 @@ export const CategoryConfig = [
 ];
 export const LargeCategoryConfig = {
   lighting: "灯具",
-  decor: "饰品",
+  decor: "配饰",
   furniture: "家具",
 };
 

@@ -254,22 +254,43 @@ const ProductListPage = ({ params }: { params: { category: string } }) => {
   const [tags, setTags] = useState<any[]>([]);
   const getTags = async () => {
     const res = await fetchTags();
+    
+    // 获取当前大类（从categoryObj中获取大类标签）
+    const currentLargeCategory = categoryObj[selectedMainCategory]?.categoryLabel || "";
 
     const tags = res.reduce((acc: any, item: any) => {
-      // 移除大类过滤，全量显示所有标签
-      if (!acc[item.type]) {
-        acc[item.type] = [];
+      // 根据大类过滤标签
+      if (item.type !== undefined) {
+        // 如果设置了适用大类，需要检查是否匹配当前大类
+        if (item.category && currentLargeCategory) {
+          const categoryMatch = Array.isArray(item.category) 
+            ? item.category.includes(currentLargeCategory)
+            : item.category === currentLargeCategory;
+          
+          // 如果没有匹配当前大类，跳过该标签
+          if (!categoryMatch) {
+            return acc;
+          }
+        }
+        
+        // 如果标签没有设置适用大类，或者匹配当前大类，则添加到列表
+        if (!acc[item.type]) {
+          acc[item.type] = [];
+        }
+        const single = { label: item.name, value: item.name };
+        acc[item.type].push(single);
       }
-      const single = { label: item.name, value: item.name };
-      acc[item.type].push(single);
       return acc;
     }, {});
     setTags(tags);
   };
 
   useEffect(() => {
-    getTags();
-  }, []); // 移除依赖，只在组件初始化时加载一次
+    // 当大类或分类数据改变时，重新获取标签
+    if (categoryObj[selectedMainCategory]) {
+      getTags();
+    }
+  }, [selectedMainCategory, categoryObj]); // 依赖大类变化
 
   const [brands, setBrands] = useState<any[]>([]);
   const getBrands = async () => {
@@ -298,14 +319,19 @@ const ProductListPage = ({ params }: { params: { category: string } }) => {
 
   const getList = debounce(async function () {
     if (!categoryObj[selectedMainCategory]) return;
-    // 将标签对象转换为扁平数组
-    const allSelectedTags = Object.values(selectedTags).flat();
+    // 传递按标签类型分组的参数（相同类型内OR，不同类型间AND）
+    const tagsByType: Record<string, string[]> = {};
+    Object.keys(selectedTags).forEach(type => {
+      if (selectedTags[type] && selectedTags[type].length > 0) {
+        tagsByType[type] = selectedTags[type];
+      }
+    });
     getProductList({
       largeCategory: categoryObj[selectedMainCategory].categoryLabel,
       categories: selectedCategories,
       brand: selectedBrands,
       productStatus: selectedStatus,
-      tags: allSelectedTags,
+      tagsByType: Object.keys(tagsByType).length > 0 ? tagsByType : undefined,
       pageNum: 1,
       pageSize: 99999,
     }).then((res) => {
@@ -330,7 +356,9 @@ const ProductListPage = ({ params }: { params: { category: string } }) => {
       setSelectedCategories([]);
       setSelectedBrands([]);
       setSelectedStatus([]);
+      // 清空已选标签（因为大类改变，标签选项会变化）
       setSelectedTags({});
+      // 注意：getTags会在另一个useEffect中自动调用，这里不需要手动调用
     }
   }, [categoryObj, selectedMainCategory]);
 

@@ -16,13 +16,35 @@ interface Banner {
   title3: string;
 }
 
+// 检测浏览器是否支持3D变换
+const supports3DTransform = () => {
+  if (typeof window === "undefined") return true;
+  const testEl = document.createElement("div");
+  const prefixes = ["", "webkit", "moz", "ms", "o"];
+  const props = ["transform", "perspective"];
+  
+  for (let i = 0; i < props.length; i++) {
+    for (let j = 0; j < prefixes.length; j++) {
+      const prop = prefixes[j] ? `${prefixes[j]}${props[i].charAt(0).toUpperCase()}${props[i].slice(1)}` : props[i];
+      if (prop in testEl.style) {
+        return true;
+      }
+    }
+  }
+  return false;
+};
+
 const HeroBanner = () => {
   const [mounted, setMounted] = useState(false);
   const [bannerList, setBannerList] = useState<Banner[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [slideDirection, setSlideDirection] = useState(0); // -1 for left, 1 for right
+  const [supports3D, setSupports3D] = useState(true);
 
   useEffect(() => {
+    // 检测浏览器支持
+    setSupports3D(supports3DTransform());
+    
     const getBannerListData = async () => {
       const [err, list] = await tryCatch(getBannerList);
       if (err) return;
@@ -80,6 +102,24 @@ const HeroBanner = () => {
         .slick-dots li button:before {
           opacity: 0;
         }
+        /* 确保文字在搜狗浏览器中可见 */
+        .slick-slide h2,
+        .slick-slide p {
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+          text-rendering: optimizeLegibility;
+          /* 强制硬件加速 */
+          transform: translateZ(0);
+          -webkit-transform: translateZ(0);
+          -moz-transform: translateZ(0);
+          -ms-transform: translateZ(0);
+          -o-transform: translateZ(0);
+        }
+        /* 兼容性：确保文字层始终在最上层 */
+        .slick-slide [class*="z-20"] {
+          position: relative;
+          z-index: 20 !important;
+        }
       `}</style>
       <Slider {...settings} className="h-full">
         {bannerList.map((banner, index) => (
@@ -117,21 +157,44 @@ const HeroBanner = () => {
                 }}
               /> */}
             </div>
-            <div className="absolute inset-0 z-20 flex flex-col justify-center px-8 md:px-16 lg:px-24">
-              <motion.div key={index} className="max-w-3xl relative">
+            <div 
+              className="absolute inset-0 z-20 flex flex-col justify-center px-8 md:px-16 lg:px-24"
+              style={{
+                // 确保文字层始终可见
+                position: "absolute",
+                zIndex: 20,
+                pointerEvents: "none",
+              }}
+            >
+              <motion.div 
+                key={index} 
+                className="max-w-3xl relative"
+                style={{
+                  pointerEvents: "auto",
+                }}
+              >
                 <motion.h2
                   initial={{
                     x: slideDirection * 50,
                     opacity: 0,
-                    rotateY: slideDirection * 45,
+                    ...(supports3D ? { rotateY: slideDirection * 45 } : {}),
                   }}
                   animate={{
                     x: currentSlide === index ? 0 : slideDirection * -50,
                     opacity: currentSlide === index ? 1 : 0,
-                    rotateY: currentSlide === index ? 0 : slideDirection * -45,
+                    ...(supports3D ? { rotateY: currentSlide === index ? 0 : slideDirection * -45 } : {}),
                   }}
                   transition={{ duration: 0.6, delay: 0.2 }}
                   className="text-6xl md:text-7xl lg:text-8xl font-bold text-white italic mb-6 origin-left"
+                  style={{
+                    // 确保文字始终可见，即使动画失败
+                    willChange: supports3D ? "transform, opacity" : "opacity",
+                    backfaceVisibility: "hidden",
+                    WebkitBackfaceVisibility: "hidden",
+                    // 确保文字层始终显示
+                    display: "block",
+                    position: "relative",
+                  }}
                 >
                   {banner.title1}
                 </motion.h2>
@@ -140,16 +203,22 @@ const HeroBanner = () => {
                     initial={{
                       x: slideDirection * 50,
                       opacity: 0,
-                      rotateY: slideDirection * 45,
+                      ...(supports3D ? { rotateY: slideDirection * 45 } : {}),
                     }}
                     animate={{
                       x: currentSlide === index ? 0 : slideDirection * -50,
                       opacity: currentSlide === index ? 1 : 0,
-                      rotateY:
-                        currentSlide === index ? 0 : slideDirection * -45,
+                      ...(supports3D ? { rotateY: currentSlide === index ? 0 : slideDirection * -45 } : {}),
                     }}
                     transition={{ duration: 0.6, delay: 0.3 }}
                     className="text-3xl md:text-4xl lg:text-5xl font-medium text-white whitespace-pre-line origin-left"
+                    style={{
+                      willChange: supports3D ? "transform, opacity" : "opacity",
+                      backfaceVisibility: "hidden",
+                      WebkitBackfaceVisibility: "hidden",
+                      display: "block",
+                      position: "relative",
+                    }}
                   >
                     {banner.title2}
                   </motion.p>
@@ -158,16 +227,22 @@ const HeroBanner = () => {
                       initial={{
                         x: slideDirection * 50,
                         opacity: 0,
-                        rotateY: slideDirection * 45,
+                        ...(supports3D ? { rotateY: slideDirection * 45 } : {}),
                       }}
                       animate={{
                         x: currentSlide === index ? 0 : slideDirection * -50,
                         opacity: currentSlide === index ? 1 : 0,
-                        rotateY:
-                          currentSlide === index ? 0 : slideDirection * -45,
+                        ...(supports3D ? { rotateY: currentSlide === index ? 0 : slideDirection * -45 } : {}),
                       }}
                       transition={{ duration: 0.6, delay: 0.4 }}
                       className="text-xl md:text-2xl text-white/90 mt-4 origin-left"
+                      style={{
+                        willChange: supports3D ? "transform, opacity" : "opacity",
+                        backfaceVisibility: "hidden",
+                        WebkitBackfaceVisibility: "hidden",
+                        display: "block",
+                        position: "relative",
+                      }}
                     >
                       {banner.title3}
                     </motion.p>

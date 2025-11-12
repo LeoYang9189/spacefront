@@ -5,8 +5,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { useRouter, useParams } from "next/navigation";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import { getProductDetail, getProductRecommend } from "@/api/stock";
-import { tryCatch } from "@/utils/util";
+import { getProductDetail } from "@/api/stock";
 
 // 格式化价格：整数不显示 .00，只有小数时才显示
 const formatPrice = (price: number | string | undefined | null): string => {
@@ -27,7 +26,6 @@ export default function ProductDetail() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [productImages, setProductImages] = useState<string[]>([]);
   const [productDetail, setProductDetail] = useState<any>(null);
-  const [recommendProducts, setRecommendProducts] = useState<any[]>([]);
   const router = useRouter();
   const params = useParams();
 
@@ -53,18 +51,8 @@ export default function ProductDetail() {
     }
   };
 
-  // 获取推荐商品
-  const fetchProductRecommend = async () => {
-    const [err, res] = await tryCatch(getProductRecommend, {
-      largeCategory: params.category,
-      randFlag: true,
-    });
-    if (err) return;
-    setRecommendProducts(res.records);
-  };
   useEffect(() => {
     fetchProductDetail();
-    fetchProductRecommend();
   }, []);
 
   return (
@@ -165,6 +153,32 @@ export default function ProductDetail() {
                 </div>
               </div>
             </div>
+
+            {/* 数量信息 - 独立显示 */}
+            {(productDetail?.inStockQuantity !== null && productDetail?.inStockQuantity !== undefined) ||
+             (productDetail?.inTransitQuantity !== null && productDetail?.inTransitQuantity !== undefined) ||
+             (productDetail?.specialPriceQuantity !== null && productDetail?.specialPriceQuantity !== undefined) ? (
+              <div className="space-y-2 mt-4">
+                {productDetail?.inStockQuantity !== null && productDetail?.inStockQuantity !== undefined && (
+                  <div className="flex items-center gap-4 bg-gray-50 p-4 rounded-lg">
+                    <span className="text-gray-500">现货数量</span>
+                    <span className="text-gray-900">{productDetail.inStockQuantity} 件</span>
+                  </div>
+                )}
+                {productDetail?.inTransitQuantity !== null && productDetail?.inTransitQuantity !== undefined && (
+                  <div className="flex items-center gap-4 bg-gray-50 p-4 rounded-lg">
+                    <span className="text-gray-500">在途数量</span>
+                    <span className="text-gray-900">{productDetail.inTransitQuantity} 件</span>
+                  </div>
+                )}
+                {productDetail?.specialPriceQuantity !== null && productDetail?.specialPriceQuantity !== undefined && (
+                  <div className="flex items-center gap-4 bg-gray-50 p-4 rounded-lg">
+                    <span className="text-gray-500">特价数量</span>
+                    <span className="text-gray-900">{productDetail.specialPriceQuantity} 件</span>
+                  </div>
+                )}
+              </div>
+            ) : null}
           </div>
         </div>
       </div>
@@ -215,43 +229,12 @@ export default function ProductDetail() {
             </div>
           </section>
 
-          {/* 设计师介绍 */}
-          <section className="mb-16">
-            <h2 className="text-2xl font-bold text-gray-900 mb-8">
-              设计师介绍
-            </h2>
-            <div
-              className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center text-gray-600"
-              dangerouslySetInnerHTML={{
-                __html: productDetail?.designerIntroduction,
-              }}
-            ></div>
-            {/* <div className="relative h-[300px] md:col-span-1 rounded-lg overflow-hidden">
-                <Image
-                  src="/new3.jpg"
-                  alt="设计师照片"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div className="md:col-span-2">
-                <h3 className="text-xl font-bold text-gray-900 mb-4">
-                  Umut Yamac
-                </h3>
-                <p className="text-gray-600 leading-relaxed">
-                  Umut Yamac 是一位建筑师和设计师，在伦敦工作和生活。
-                  他的作品探索物体、空间和它们与使用者之间的关系。
-                  每件作品都融合了精确的几何结构和诗意的品质。
-                  他的设计常常包含动态元素，让作品能够回应和互动。
-                </p>
-              </div> */}
-          </section>
 
           {/* 产品介绍 */}
           <section className="mb-16">
             <h2 className="text-2xl font-bold text-gray-900 mb-8">产品介绍</h2>
             <div
-              className="grid grid-cols-1 gap-8 text-gray-600"
+              className="product-show-content text-gray-600"
               dangerouslySetInnerHTML={{
                 __html: productDetail?.productShow,
               }}
@@ -277,34 +260,6 @@ export default function ProductDetail() {
         </div>
       </div>
 
-      {/* 推荐产品 */}
-      <div className="container mx-auto px-4 py-16">
-        <h2 className="text-2xl font-bold text-gray-900 mb-8">推荐产品</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {recommendProducts.map((product) => (
-            <motion.div
-              key={product.id}
-              whileHover={{ y: -5 }}
-              className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow"
-            >
-              <div className="relative h-64">
-                <Image
-                  src={product.productCoverImageList}
-                  alt={product.productName}
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div className="p-4">
-                <h3 className="text-lg font-medium text-gray-900 mb-1">
-                  {product.productName}
-                </h3>
-                <p className="text-sm text-brand-600">{product.brand}</p>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
 
       {/* 返回按钮 */}
       <div className="container mx-auto px-4 py-8 text-center">
@@ -318,3 +273,58 @@ export default function ProductDetail() {
     </main>
   );
 }
+
+// 添加样式确保产品介绍中的图片和视频正确显示
+useEffect(() => {
+  const styleId = 'product-show-styles';
+  if (typeof document !== 'undefined' && !document.getElementById(styleId)) {
+    const style = document.createElement('style');
+    style.id = styleId;
+    style.textContent = `
+      .product-show-content {
+        width: 100%;
+        max-width: 100%;
+      }
+      
+      .product-show-content img {
+        max-width: 100% !important;
+        width: auto !important;
+        height: auto !important;
+        display: block;
+        margin: 1rem 0;
+        border-radius: 8px;
+      }
+      
+      .product-show-content video {
+        max-width: 100% !important;
+        width: auto !important;
+        height: auto !important;
+        display: block;
+        margin: 1rem 0;
+        border-radius: 8px;
+      }
+      
+      .product-show-content iframe {
+        max-width: 100% !important;
+        margin: 1rem 0;
+        border-radius: 8px;
+      }
+      
+      .product-show-content p {
+        margin: 1rem 0;
+        line-height: 1.8;
+      }
+      
+      .product-show-content * {
+        max-width: 100%;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+  
+  return () => {
+    // 组件卸载时清理样式（可选）
+    // const style = document.getElementById('product-show-styles');
+    // if (style) style.remove();
+  };
+}, []);

@@ -10,6 +10,9 @@ interface ProductDetail {
   designerIntroduction: string;
   productShow: string;
   qrcode: string;
+  inStockQuantity?: number | null; // 现货数量
+  inTransitQuantity?: number | null; // 在途数量
+  specialPriceQuantity?: number | null; // 特价数量
 }
 
 // 产品列表
